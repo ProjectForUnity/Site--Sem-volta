@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Quiz de Programação</title>
+
+<style>
+    body {
+        background: #0f0f0f;
+        color: #eee;
+        font-family: Arial;
+        padding: 20px;
+        text-align: center;
+    }
+    h1 {
+        color: #4da6ff;
+    }
+    .pergunta {
+        font-size: 22px;
+        margin-bottom: 20px;
+        color: #66c2ff;
+    }
+    .opcao {
+        background: #222;
+        padding: 12px;
+        margin: 8px auto;
+        width: 60%;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .opcao:hover {
+        background: #444;
+        transform: scale(1.03);
+    }
+    #timer {
+        font-size: 26px;
+        color: #ffcc00;
+        margin-bottom: 20px;
+    }
+</style>
+</head>
+<body>
+
+<h1>QUIZ DE PROGRAMAÇÃO</h1>
+<h3>Se falhas uma é logo game over</h3>
+
+<div id="timer"></div>
+<div id="conteudo"></div>
+
+<script>
+// ==========================
+// PERGUNTAS (versão JS)
+// ==========================
+const perguntas = [
+    {
+        pergunta: "Qual é a principal função da memória RAM?",
+        opcoes: [
+            "Armazenar dados temporariamente",
+            "Armazenar dados permanentemente",
+            "Armazenar ficheiros multimédia",
+            "Guardar configurações do sistema"
+        ],
+        correta: "Armazenar dados temporariamente"
+    },
+    {
+        pergunta: "Qual é o sistema operativo mais utilizado mundialmente?",
+        opcoes: [
+            "Windows",
+            "Linux",
+            "macOS",
+            "Android"
+        ],
+        correta: "Windows"
+    },
+    {
+        pergunta: "O que significa 'CPU'?",
+        opcoes: [
+            "Central Processing Unit",
+            "Computer Power Unit",
+            "Central Program Utility",
+            "Core Programming Unit"
+        ],
+        correta: "Central Processing Unit"
+    },
+    {
+        pergunta: "Qual é o símbolo usado para determinar igualdade em Python?",
+        opcoes: [
+            "==",
+            "=",
+            "===",
+            "!="
+        ],
+        correta: "=="
+    },
+    {
+        pergunta: "Qual é o resultado de 2 ** 3 em Python?",
+        opcoes: [
+            "8",
+            "6",
+            "9",
+            "12"
+        ],
+        correta: "8"
+    },
+    {
+        pergunta: "Qual destes é um tipo de dado em Python?",
+        opcoes: [
+            "string",
+            "text",
+            "word",
+            "sentence"
+        ],
+        correta: "string"
+    },
+    {
+        pergunta: "O que faz o comando 'print()' em Python?",
+        opcoes: [
+            "Mostra informação no ecrã",
+            "Guarda dados num ficheiro",
+            "Apaga variáveis",
+            "Cria uma nova função"
+        ],
+        correta: "Mostra informação no ecrã"
+    },
+    {
+        pergunta: "Qual é o operador lógico 'E' em Python?",
+        opcoes: [
+            "and",
+            "or",
+            "&",
+            "&&"
+        ],
+        correta: "and"
+    }
+];
+</script>
+
+<script>
+// ==========================
+// MENSAGENS ALEATÓRIAS
+// ==========================
+function msg_acerto() {
+    const i = ["Boa", "Acertaste", "Top", "Muito bem", "És craque"];
+    const f = ["!", "!!", "!!!", "... incrível!", "... fantástico!"];
+    return i[Math.floor(Math.random()*i.length)] + f[Math.floor(Math.random()*f.length)];
+}
+function msg_erro() {
+    const i = ["Falhaste", "Ups", "Erraste", "Ui", "Não era isso"];
+    const f = ["!", "!!", "!!!", "... tenta outra vez", "... cuidado!"];
+    return i[Math.floor(Math.random()*i.length)] + f[Math.floor(Math.random()*f.length)];
+}
+function msg_final() {
+    const i = ["Acabaste o quiz", "Vitória", "Rei do teclado", "Dominaste isto", "Missão concluída"];
+    const f = ["!", "!!", "!!!", "... parabéns!", "... és um mestre!"];
+    return i[Math.floor(Math.random()*i.length)] + f[Math.floor(Math.random()*f.length)];
+}
+
+// ==========================
+// LÓGICA DO QUIZZ
+// ==========================
+let lista = [];
+let index = 0;
+let tempo = 10;
+let intervalo;
+
+function baralhar(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+
+function iniciarQuiz() {
+    lista = [...perguntas];
+    baralhar(lista);
+    index = 0;
+    mostrarPergunta();
+}
+
+function mostrarPergunta() {
+    const area = document.getElementById("conteudo");
+    const timer = document.getElementById("timer");
+
+    if (index >= lista.length) {
+        area.innerHTML = `<h2 style="color:#b366ff">${msg_final()}</h2>`;
+        timer.innerHTML = "";
+        return;
+    }
+
+    tempo = 10;
+    timer.textContent = `Tempo: ${tempo}s`;
+    clearInterval(intervalo);
+
+    intervalo = setInterval(() => {
+        tempo--;
+        timer.textContent = `Tempo: ${tempo}s`;
+        if (tempo <= 0) {
+            clearInterval(intervalo);
+            alert("Tempo esgotado! " + msg_erro());
+            iniciarQuiz();
+        }
+    }, 1000);
+
+    const p = lista[index];
+    let opcoes = [...p.opcoes];
+    baralhar(opcoes);
+
+    area.innerHTML = `
+        <div class="pergunta">${index + 1}) ${p.pergunta}</div>
+        ${opcoes.map(o =>
+            `<div class='opcao' onclick="responder('${o.replace(/'/g,"\\'")}','${p.correta.replace(/'/g,"\\'")}')">${o}</div>`
+        ).join("")}
+    `;
+}
+
+function responder(opcao, correta) {
+    clearInterval(intervalo);
+
+    if (opcao !== correta) {
+        alert(msg_erro());
+        iniciarQuiz();
+        return;
+    }
+
+    alert(msg_acerto());
+    index++;
+    mostrarPergunta();
+}
+
+iniciarQuiz();
+</script>
+
+</body>
+</html>
